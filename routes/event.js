@@ -3,7 +3,6 @@ const { fileUploadControl } = require("../middleware/uploadController");
 const _ = require("lodash");
 const fs = require("fs");
 const express = require("express");
-const { pick } = require("lodash");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -43,8 +42,9 @@ router.put("/:id", fileUploadControl.single("file"), async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { error } = validateID(req.params);
-  if (error) return res.status(400).send(error.details[0].message);
+  const errorDetails = validateID(req.params);
+  if (errorDetails.error)
+    return res.status(400).send(errorDetails.error.details[0].message);
 
   let event = await Events.findById(req.params.id);
   if (!event) return res.status(400).send("Event not Found");
@@ -63,7 +63,7 @@ router.put("/:id", fileUploadControl.single("file"), async (req, res) => {
     { new: true }
   );
 
-  res.send(_, pick(event, ["title", "eventDate", "eventTime"]));
+  res.send(_.pick(event, ["title", "eventDate", "eventTime"]));
 });
 
 router.delete("/:id", async (req, res) => {
@@ -72,5 +72,9 @@ router.delete("/:id", async (req, res) => {
 
   const event = await Events.findByIdAndRemove(req.params.id);
 
+  if (!event) return res.status(400).send("Event cannot be found");
+
   res.send(_.pick(event, ["title", "eventDate", "eventTime"]));
 });
+
+module.exports = router;
