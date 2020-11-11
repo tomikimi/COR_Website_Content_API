@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 const facility = require("./routes/facility");
+const event = require("./routes/event");
 
 if (!config.get("jwtPrivateKey")) {
   console.error("FATAL ERROR:jwt private key not defined");
@@ -22,6 +23,7 @@ mongoose
 app.use(cors());
 app.use(express.json());
 app.use("/api/facility", facility);
+app.use("/api/event", event);
 
 const PORT = process.env.PORT || 3000;
 
